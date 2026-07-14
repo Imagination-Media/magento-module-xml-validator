@@ -65,7 +65,7 @@ class ValidateXmlCommand extends Command
 
     public function __construct(
         ObjectManagerProvider $objectManagerProvider,
-        string $name = null
+        ?string $name = null
     ) {
         $this->objectManager = $objectManagerProvider->get();
         $this->domDocumentFactory = $this->objectManager->create(DomDocumentFactory::class);
