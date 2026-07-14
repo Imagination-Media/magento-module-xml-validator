@@ -25,10 +25,15 @@ entering the following commands into your terminal or command prompt:
 
 ### Post-Installation
 
-After installation of the extension, you **must** run the following command to
-patch your `setup/src/Magento/Setup/Console/CommandList.php` file. This will
-allow the tool to run with only the core Magento files installed and no
-database.
+After installation, the next step depends on your Magento version:
+
+- **Magento 2.4.8 and newer**: no patch is required. The module now integrates
+  with `setup/src/Magento/Setup/Console/CommandLoader.php` instead of the
+  removed `CommandList.php` file.
+- **Magento 2.4.7 and older**: you **must** run the following patch command to
+  patch your `setup/src/Magento/Setup/Console/CommandList.php` file. This
+  allows the tool to run with only the core Magento files installed and no
+  database.
 
     patch -p1 < vendor/imaginationmedia/module-xml-validator/patches/Add-validate-XML-command-to-Setup-Command-List.patch
 
