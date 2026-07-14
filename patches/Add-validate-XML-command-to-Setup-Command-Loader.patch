@@ -1,0 +1,14 @@
+diff --git a/setup/src/Magento/Setup/Console/CommandLoader.php b/setup/src/Magento/Setup/Console/CommandLoader.php
+index 95f4365..ce83a74 100644
+--- a/setup/src/Magento/Setup/Console/CommandLoader.php
++++ b/setup/src/Magento/Setup/Console/CommandLoader.php
+@@ -56,7 +56,8 @@ class CommandLoader implements CommandLoaderInterface
+         Command\RollbackCommand::NAME => Command\RollbackCommand::class,
+         Command\UpgradeCommand::NAME => Command\UpgradeCommand::class,
+         Command\UninstallCommand::NAME => Command\UninstallCommand::class,
+-        Command\DeployStaticContentCommand::NAME => Command\DeployStaticContentCommand::class
++        Command\DeployStaticContentCommand::NAME => Command\DeployStaticContentCommand::class,
++        'dev:xml:validate' => \ImaginationMedia\XmlValidator\Console\Command\ValidateXmlCommand::class
+     ];
+
+     /**
