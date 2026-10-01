@@ -21,12 +21,14 @@ use Magento\TestFramework\Helper\Bootstrap;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Finder\Finder;
 
 use function ltrim;
 use function preg_replace;
 use function putenv;
 use function realpath;
 use function str_replace;
+use function substr_count;
 
 use const BP;
 
@@ -85,6 +87,32 @@ final class ValidateXmlCommandTest extends TestCase
 
         self::assertSame($expectedOutput, $actualOutput);
         self::assertSame($expectedReturnCode, $actualReturnCode);
+    }
+
+    public function testCommandValidatesEachFileOnceWhenGivenMultipleDirectories(): void
+    {
+        /** @var CommandTester $commandTester */
+        $commandTester = $this->objectManager->create(
+            CommandTester::class,
+            [
+                'command' => $this->validateXmlCommand
+            ]
+        );
+        $commandOptions = [
+            'paths' => [
+                __DIR__ . '/../../_files/valid',
+                __DIR__ . '/../../_files/invalid',
+            ]
+        ];
+
+        $commandTester->execute($commandOptions);
+
+        $actualOutput = $commandTester->getDisplay();
+
+        self::assertSame(1, substr_count($actualOutput, '_files/valid/module.xml against'));
+        self::assertSame(1, substr_count($actualOutput, '_files/invalid/module.xml against'));
+        self::assertStringContainsString('2 of 3 files are valid', $actualOutput);
+        self::assertSame(1, $commandTester->getStatusCode());
     }
 
     public function testCommandValidatesXmlAndOutputsToGitHubActions(): void
@@ -261,24 +289,21 @@ final class ValidateXmlCommandTest extends TestCase
         $objectManagerProviderMock = $this->createMock(ObjectManagerProvider::class);
 
         $objectManagerMock->method('create')
-            ->willReturnMap(
-                [
-                    [
-                        DomDocumentFactory::class,
-                        [],
-                        new DomDocumentFactory()
-                    ],
-                    [
-                        File::class,
-                        [],
-                        new File()
-                    ],
-                    [
-                        UrnResolver::class,
-                        [],
-                        new UrnResolver()
-                    ]
-                ]
+            ->willReturnCallback(
+                static function (string $type) {
+                    switch ($type) {
+                        case DomDocumentFactory::class:
+                            return new DomDocumentFactory();
+                        case File::class:
+                            return new File();
+                        case UrnResolver::class:
+                            return new UrnResolver();
+                        case Finder::class:
+                            return new Finder();
+                        default:
+                            return null;
+                    }
+                }
             );
 
         $objectManagerProviderMock
