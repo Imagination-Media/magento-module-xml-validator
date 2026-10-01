@@ -96,8 +96,6 @@ class ValidateXmlCommand extends Command
         $this->output = $output;
         $this->symfonyStyle = new SymfonyStyle($input, $this->output);
         $paths = $input->getArgument('paths');
-        /** @var Finder $finder */
-        $finder = $this->objectManager->create(Finder::class);
         $fileCount = 0;
         $validFiles = 0;
 
@@ -111,7 +109,7 @@ class ValidateXmlCommand extends Command
 
         array_walk(
             $paths,
-            function (string $path) use ($finder, &$fileCount, &$validFiles): void {
+            function (string $path) use (&$fileCount, &$validFiles): void {
                 if ($this->driver->isFile($path)) {
                     $fileName = basename($path);
 
@@ -131,6 +129,10 @@ class ValidateXmlCommand extends Command
 
                     $xmlFiles = [$path];
                 } else {
+                    /* A new Finder is needed for each path, as `in()` and `name()` add to the criteria of an existing
+                       instance, which would cause previously given directories to be searched again. */
+                    /** @var Finder $finder */
+                    $finder = $this->objectManager->create(Finder::class);
                     $xmlFiles = $finder->files()
                         ->name('*.xml')
                         ->notName(self::EXCLUDED_FILES)
